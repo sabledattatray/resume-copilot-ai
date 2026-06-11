@@ -264,6 +264,71 @@ Output strictly in the following JSON format:
     }
   });
 
+  // API Route for Generating Resume via AI Prompt
+  app.post('/api/generate-resume', async (req, res) => {
+    try {
+      let aiClient;
+      try {
+        aiClient = getAi();
+      } catch (err) {
+        return res.status(500).json({ error: 'Gemini API key is not configured.' });
+      }
+
+      const { prompt } = req.body;
+      if (!prompt) {
+         return res.status(400).json({ error: 'Prompt is required' });
+      }
+
+      const promptText = `Generate a realistic, highly professional resume in perfectly structured JSON format based on the following user prompt.
+Produce rich, detailed, realistic bullet points focused on impact, metrics, and action verbs. Make sure the total length is substantial so it fills up a full page. Do NOT wrap the JSON in Markdown code blocks.
+
+User Prompt: "${prompt}"
+
+Required JSON format:
+{
+  "name": "String (Realistic name or use a default like 'Alex Johnson')",
+  "title": "String (e.g. Senior Software Engineer)",
+  "email": "String",
+  "phone": "String",
+  "summary": "String (A compelling, multi-sentence professional summary)",
+  "experience": [
+    {
+      "company": "String",
+      "role": "String",
+      "duration": "String (e.g. Jan 2021 - Present)",
+      "description": "String (Multiple bullet points separated by \\n character. Use • as the bullet character for each line. Highly detailed.)"
+    }
+    // Include 2-3 detailed experience blocks
+  ],
+  "education": [
+    {
+      "institution": "String",
+      "degree": "String",
+      "year": "String"
+    }
+  ],
+  "skills": "String (Comma separated list of skills)"
+}`;
+
+      const response = await aiClient.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [promptText],
+        config: {
+          responseMimeType: 'application/json',
+        }
+      });
+
+      const responseText = response.text || "{}";
+      const cleanJsonStr = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const result = JSON.parse(cleanJsonStr);
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error generating resume:', error);
+      res.status(500).json({ error: 'Failed to generate resume from AI.' });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     // createViteServer is async
