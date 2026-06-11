@@ -106,7 +106,7 @@ export default function TemplateEditorPage() {
   const paddingClass = spacing === 'compact' ? 'p-6' : spacing === 'relaxed' ? 'p-16' : 'p-10';
 
   return (
-    <div className="flex flex-col w-full h-[calc(100vh)] bg-[#f3f4f6] print:bg-white print:h-auto font-sans overflow-hidden">
+    <div className="flex flex-col w-full h-[calc(100vh)] bg-[#f3f4f6] print:bg-white print:h-auto print:block font-sans overflow-hidden print:overflow-visible">
       {/* Top Navbar */}
       <div className="flex justify-between items-center bg-white border-b border-gray-200 px-6 py-3 print:hidden z-10 shrink-0 shadow-sm">
         <div className="flex items-center gap-4">
@@ -128,7 +128,7 @@ export default function TemplateEditorPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden print:overflow-visible">
+      <div className="flex flex-1 overflow-hidden print:overflow-visible print:block print:h-auto">
         {/* Editor Sidebar */}
         <div style={{ width: sidebarWidth }} className="bg-white border-r border-gray-200 flex flex-col shrink-0 hidden md:flex print:hidden shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 relative">
           
@@ -471,7 +471,7 @@ export default function TemplateEditorPage() {
         </div>
 
         {/* Live Preview / Canvas */}
-        <div className="flex-1 bg-[#b5b8c0] overflow-y-auto flex justify-center py-10 px-4 print:p-0 print:bg-white custom-scrollbar">
+        <div className="flex-1 bg-[#b5b8c0] overflow-y-auto flex justify-center py-10 px-4 print:p-0 print:bg-white custom-scrollbar print:overflow-visible print:block print:h-auto">
           <div 
              className={`bg-white shadow-[0_10px_40px_rgba(0,0,0,0.15)] origin-top mx-auto print:shadow-none print:mx-0 transition-all duration-300 ${pageSize === 'a4' ? 'w-[210mm] min-h-[297mm]' : 'w-[8.5in] min-h-[11in]'} ${fontFamily} ${fontSize}`}
           >

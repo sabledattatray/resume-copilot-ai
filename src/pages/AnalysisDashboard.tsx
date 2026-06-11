@@ -36,14 +36,15 @@ export default function AnalysisDashboard() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.pathname === '/app/analyze' || location.pathname === '/app') {
+    const searchParams = new URLSearchParams(location.search);
+    if (location.pathname === '/app/analyze' || searchParams.get('reset') === 'true') {
       setStatus('IDLE');
       setJobDescription('');
       setFiles([]);
       setResults([]);
       setErrorMsg(null);
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -606,7 +607,7 @@ function ResultsView({ results, onReset, handleShare, shareCopied, sharing }: { 
       exit={{ opacity: 0, y: 15 }}
       className="space-y-6 pb-12"
     >
-      <div className="bg-white sticky top-[57px] z-30 pt-4 pb-4 border-b border-gray-100 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white sticky top-[57px] z-30 pt-4 pb-4 border-b border-gray-100 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
             <h2 className="text-2xl font-bold tracking-tight text-black flex items-center gap-3">
                 Analysis Results

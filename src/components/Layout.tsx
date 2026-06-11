@@ -13,7 +13,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FA] font-sans text-[#1A1A1A]">
-      <header className="h-20 w-full px-4 md:px-12 flex items-center justify-between border-b border-gray-200 bg-white sticky top-0 z-50">
+      <header className="h-20 w-full px-4 md:px-12 flex items-center justify-between border-b border-gray-200 bg-white sticky top-0 z-50 print:hidden">
         <div className="container mx-auto h-full flex items-center justify-between">
           <Link to="/" className="flex items-center text-black z-50">
             <Logo />
@@ -33,7 +33,7 @@ export default function Layout() {
               </>
             ) : (
               <>
-                <Link to="/app" className="hover:text-black transition-colors flex items-center gap-2">
+                <Link to="/app?reset=true" className="hover:text-black transition-colors flex items-center gap-2">
                   <LayoutDashboard className="w-4 h-4" /> Dashboard
                 </Link>
                 <Link to="/app/analyze" className="hover:text-black transition-colors flex items-center gap-2">
@@ -77,7 +77,7 @@ export default function Layout() {
               </>
             ) : (
               <>
-                <Link to="/app" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-gray-100 pb-4 flex items-center gap-3">
+                <Link to="/app?reset=true" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-gray-100 pb-4 flex items-center gap-3">
                   <LayoutDashboard className="w-6 h-6" /> Dashboard
                 </Link>
                 <Link to="/app/analyze" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-gray-100 pb-4 flex items-center gap-3">
