@@ -238,7 +238,18 @@ export default function AnalysisDashboard() {
         const response = await fetch('/api/analyze', { method: 'POST', body: formData });
         let data;
         const text = await response.text();
-        try { data = JSON.parse(text); } catch (err) { data = { error: 'Invalid response from server.' }; }
+        if (!response.ok && text.trim().startsWith('<')) {
+           // It's likely an HTML error page from a reverse proxy
+           if (response.status === 413) {
+              throw new Error('Your file is too large. Please upload a smaller file under 1MB, or remove images from the PDF.');
+           } else if (response.status === 504 || response.status === 502) {
+              throw new Error('The server timed out while analyzing your resume. This usually means the AI took too long. Please try a shorter resume.');
+           } else {
+              throw new Error(`Server error (${response.status}): ${response.statusText}`);
+           }
+        }
+        
+        try { data = JSON.parse(text); } catch (err) { data = { error: 'Invalid response from server: ' + text.substring(0, 50) }; }
 
         if (response.ok && !data.error) {
             data.fileName = f.name;

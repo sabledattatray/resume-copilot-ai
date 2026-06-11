@@ -228,23 +228,36 @@ Output strictly in the following JSON format:
         }
       }
       
-      const response = await aiClient.models.generateContent({
-        model: 'gemini-2.5-flash', // fast model for this
-        contents: [
-          promptText,
-          {
-            inlineData: {
-              data: file.buffer.toString("base64"),
-              mimeType: mimeType
+      let responseText = "{}";
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          const response = await aiClient.models.generateContent({
+            model: 'gemini-2.5-flash', // fast model for this
+            contents: [
+              promptText,
+              {
+                inlineData: {
+                  data: file.buffer.toString("base64"),
+                  mimeType: mimeType
+                }
+              }
+            ],
+            config: {
+              responseMimeType: 'application/json',
             }
+          });
+          responseText = response.text || "{}";
+          break; // Success
+        } catch (genErr: any) {
+          retries--;
+          if (retries === 0 || (genErr.status !== 503 && genErr.status !== 429)) {
+            throw genErr; // Rethrow if out of retries or not a transient error
           }
-        ],
-        config: {
-          responseMimeType: 'application/json',
+          console.log(`Gemini API busy (Status: ${genErr.status}). Retrying in 2 seconds...`);
+          await new Promise(r => setTimeout(r, 2000));
         }
-      });
-
-      const responseText = response.text || "{}";
+      }
       console.log('Gemini raw response:', responseText);
       
       // Attempt to clean JSON
@@ -256,11 +269,11 @@ Output strictly in the following JSON format:
     } catch (error: any) {
       console.error('Error analyzing resume:', error);
       let errMsg = 'An error occurred during analysis. Please check server logs.';
-      const errStr = error.message || String(error);
+      const errStr = error?.message || String(error);
       if (errStr.includes('document has no pages') || errStr.includes('unsupported') || errStr.includes('mime') || errStr.includes('INVALID_ARGUMENT')) {
         errMsg = 'Could not read PDF. Make sure it is a valid text-based document or PDF.';
       }
-      res.status(500).json({ error: errMsg });
+      res.status(500).json({ error: errMsg, debugDetails: errStr });
     }
   });
 
@@ -310,15 +323,26 @@ Required JSON format:
   "skills": "String (Comma separated list of skills)"
 }`;
 
-      const response = await aiClient.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [promptText],
-        config: {
-          responseMimeType: 'application/json',
+      let responseText = "{}";
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          const response = await aiClient.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [promptText],
+            config: {
+              responseMimeType: 'application/json',
+            }
+          });
+          responseText = response.text || "{}";
+          break;
+        } catch (genErr: any) {
+          retries--;
+          if (retries === 0 || (genErr.status !== 503 && genErr.status !== 429)) throw genErr;
+          console.log(`Gemini API busy (Status: ${genErr.status}). Retrying...`);
+          await new Promise(r => setTimeout(r, 2000));
         }
-      });
-
-      const responseText = response.text || "{}";
+      }
       const cleanJsonStr = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
       const result = JSON.parse(cleanJsonStr);
 
